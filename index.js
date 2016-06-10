@@ -4,6 +4,7 @@ var GAME = (function () {
         size: SIZE,
         unitsCount: 5
     });
+    var $view = $('.view');
 
     var fpsAvg = 0;
     var framesCount = 0;
@@ -50,7 +51,9 @@ var GAME = (function () {
             }
         });
 
-        window.location.replace('#' + v.join('') + ' FPS: ' + fpsAvg.toFixed(2));
+        var text = v.join('') + ' FPS: ' + fpsAvg.toFixed(2);
+
+        $view.html(text.replace(/\s/g, '&nbsp;'));
 
         return Boolean(game.getHero());
     }
@@ -122,37 +125,35 @@ var GAME = (function () {
         TheGame.pushFrame(doLayout);
     }
 
-    $(function () {
-        $('.button_action_reset').click(function () {
-            $('.page')
-                .removeClass('page_playing')
-                .addClass('page_pause');
+    $('.button_action_reset').click(function () {
+        $('.page')
+            .removeClass('page_playing')
+            .addClass('page_pause');
 
-            game.init();
-            renderGame(game);
-        });
+        game.init();
+        renderGame(game);
+    });
 
-        $('.button_action_start').click(function () {
-            if (game.start()) {
-                $(window)
-                    .on('keydown', onArrowKd)
-                    .on('keydown', onSpaceKd);
+    $('.button_action_start').click(function () {
+        if (game.start()) {
+            $(window)
+                .on('keydown', onArrowKd)
+                .on('keydown', onSpaceKd);
 
-                doLayout();
-            }
+            doLayout();
+        }
 
-            $('.page')
-                .removeClass('page_pause')
-                .addClass('page_playing');
-        });
+        $('.page')
+            .removeClass('page_pause')
+            .addClass('page_playing');
+    });
 
-        $('.button_action_pause').click(function () {
-            game.stop();
+    $('.button_action_pause').click(function () {
+        game.stop();
 
-            $('.page')
-                .removeClass('page_playing')
-                .addClass('page_pause');
-        });
+        $('.page')
+            .removeClass('page_playing')
+            .addClass('page_pause');
     });
 
     return game;

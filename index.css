@@ -1,3 +1,7 @@
+.view
+{
+    font-family: monospace;
+}
 .page_playing .button_action_start
 {
     display: none;
