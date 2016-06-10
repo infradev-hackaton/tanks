@@ -1,11 +1,24 @@
-var SIZE = 200;
+var SIZE = 150;
 var game = new TheGame({
-    size: 200,
+    size: SIZE,
     unitsCount: 5
 });
 
+var fpsAvg = 0;
+var framesCount = 0;
+var start = new Date();
 function renderGame(game) {
     var v = new Array(SIZE);
+    var now = new Date();
+    var dur = now - start;
+    framesCount += 1;
+
+    if (dur > 1000) {
+        fpsAvg += framesCount;
+        fpsAvg /= 2;
+        framesCount = 0;
+        start = now - (dur - 1000);
+    }
 
     game.each(function (unit, i) {
         if (unit instanceof Protagonist) {
@@ -35,7 +48,7 @@ function renderGame(game) {
         }
     });
 
-    window.location.replace('#' + v.join(''));
+    window.location.replace('#' + v.join('') + ' FPS: ' + fpsAvg.toFixed(2));
 
     return Boolean(game.getHero());
 }
