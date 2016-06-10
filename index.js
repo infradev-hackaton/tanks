@@ -63,15 +63,15 @@ var GAME = (function () {
                 .off('keydown', onArrowKd)
                 .on('keyup', onArrowKu);
             game.getHero().
-            setDirection(true).
-            startMoving();
+                setDirection(true).
+                startMoving();
         } else if (e.key === 'ArrowLeft') {
             $(window)
                 .off('keydown', onArrowKd)
                 .on('keyup', onArrowKu);
             game.getHero().
-            setDirection(false).
-            startMoving();
+                setDirection(false).
+                startMoving();
         }
     }
 
@@ -89,7 +89,7 @@ var GAME = (function () {
             $(window)
                 .off('keydown', onSpaceKd)
                 .on('keyup', onSpaceKu);
-            game.getHero().fire();
+            game.getHero().startFire();
         }
     }
 
@@ -98,6 +98,7 @@ var GAME = (function () {
             $(window)
                 .on('keydown', onSpaceKd)
                 .off('keyup', onSpaceKu);
+            game.getHero().stopFire();
         }
     }
 

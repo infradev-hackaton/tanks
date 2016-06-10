@@ -10,6 +10,7 @@ function TheGame(params) {
     this._positions = {};
     this.params = Object(params);
     this._paused = true;
+    this._heroId = null;
     this.init();
 }
 
@@ -22,8 +23,10 @@ TheGame.prototype.fitPos = function (pos) {
         return 0;
     }
 
-    if (pos > this._bf.length - 1) {
-        return this._bf.length - 1;
+    var lastPos = this._bf.length - 1;
+
+    if (pos > lastPos) {
+        return lastPos;
     }
 
     return pos;
@@ -32,6 +35,7 @@ TheGame.prototype.fitPos = function (pos) {
 TheGame.prototype.init = function () {
     var bf = this._bf;
     var size = this.params.size;
+    var hero = new Protagonist(this);
 
     this.stop();
 
@@ -46,18 +50,13 @@ TheGame.prototype.init = function () {
 
     size = bf.length;
 
-    this.takePos(Math.round(size / 2), new Protagonist(this));
+    this._heroId = hero.id;
+
+    this.takePos(Math.round(size / 2), hero);
 };
 
 TheGame.prototype.getHero = function () {
-    var hero = null;
-    this.eachUnit(function (unit) {
-        if (unit instanceof Protagonist) {
-            hero = unit;
-            return false;
-        }
-    });
-    return hero;
+    return this._bf[this._positions[this._heroId]];
 };
 
 TheGame.prototype.each = function (fn, ctx) {
@@ -108,7 +107,7 @@ TheGame.prototype.start = function () {
 
     this._paused = false;
 
-    (function continueGame() {
+    (function playFrame() {
         if (that.isPaused()) {
             return;
         }
@@ -117,7 +116,7 @@ TheGame.prototype.start = function () {
             that.addRandomAntagonist();
         }
 
-        TheGame.pushFrame(continueGame);
+        TheGame.pushFrame(playFrame);
     })();
 
     return true;
@@ -175,8 +174,7 @@ TheGame.prototype.getPos = function (unit) {
         return -1;
     }
 
-    var id = unit.id;
-    var pos = this._positions[id];
+    var pos = this._positions[unit.id];
 
     if (typeof pos === 'number') {
         return pos;
@@ -252,7 +250,7 @@ Unit.prototype.startMoving = function () {
 
     that._moving = true;
 
-    (function move() {
+    (function moveFrame() {
         if (!that._moving) {
             return;
         }
@@ -264,12 +262,12 @@ Unit.prototype.startMoving = function () {
 
         var now = new Date();
         var time = now - start;
-        var steps = that._speed / 1000 * time;
+        var steps = that.getSpeed() / 1000 * time;
 
-        TheGame.pushFrame(move);
+        TheGame.pushFrame(moveFrame);
 
         if (steps > 1) {
-            start = now - (time % (1000 / that._speed));
+            start = now - (time % (1000 / that.getSpeed()));
             that.moveForward(Math.floor(steps));
         }
     }());
@@ -375,11 +373,54 @@ function Protagonist() {
     this._health = 100;
     this._damage = 10;
     this._speed = 50;
+    this._fireSpeed = 6;
+    this._fireing = false;
 }
 
 Protagonist.prototype = Object.create(Unit.prototype);
 
 Protagonist.prototype.constructor = Protagonist;
+
+Protagonist.prototype.startFire = function () {
+    var that = this;
+    var start = new Date();
+
+    if (this._fireing) {
+        return false;
+    }
+
+    this._fireing = true;
+
+    (function fireFrame() {
+        if (!that._fireing) {
+            return;
+        }
+
+        if (!that.isAlive()) {
+            that.stopFire();
+            return;
+        }
+
+        var now = new Date();
+        var time = now - start;
+        var shots = that._fireSpeed / 1000 * time;
+
+        TheGame.pushFrame(fireFrame);
+
+        if (shots > 1) {
+            start = now - (time % (1000 / that._fireSpeed));
+            that.fire();
+        }
+    })();
+
+    that.fire();
+
+    return true;
+};
+
+Protagonist.prototype.stopFire = function () {
+    this._fireing = false;
+};
 
 Protagonist.prototype.fire = function () {
     var bullet = new Bullet(this._game);
@@ -408,46 +449,46 @@ Antagonist1.prototype = Object.create(Unit.prototype);
 Antagonist1.prototype.constructor = Antagonist1;
 
 function Antagonist2() {
-    Antagonist1.apply(this, arguments);
+    Unit.apply(this, arguments);
     this._health = 20;
     this._damage = 15;
     this._speed = 30;
 }
 
-Antagonist2.prototype = Object.create(Antagonist1.prototype);
+Antagonist2.prototype = Object.create(Unit.prototype);
 
 Antagonist2.prototype.constructor = Antagonist2;
 
 function Antagonist3() {
-    Antagonist2.apply(this, arguments);
+    Unit.apply(this, arguments);
     this._health = 100;
     this._damage = 5;
     this._speed = 10;
 }
 
-Antagonist3.prototype = Object.create(Antagonist2.prototype);
+Antagonist3.prototype = Object.create(Unit.prototype);
 
 Antagonist3.prototype.constructor = Antagonist3;
 
 function Antagonist4() {
-    Antagonist3.apply(this, arguments);
+    Unit.apply(this, arguments);
     this._health = 20;
     this._damage = 50;
     this._speed = 60;
 }
 
-Antagonist4.prototype = Object.create(Antagonist3.prototype);
+Antagonist4.prototype = Object.create(Unit.prototype);
 
 Antagonist4.prototype.constructor = Antagonist4;
 
 function Antagonist5() {
-    Antagonist4.apply(this, arguments);
+    Unit.apply(this, arguments);
     this._health = 50;
     this._damage = 75;
     this._speed = 40;
 }
 
-Antagonist5.prototype = Object.create(Antagonist4.prototype);
+Antagonist5.prototype = Object.create(Unit.prototype);
 
 Antagonist5.prototype.constructor = Antagonist5;
 
