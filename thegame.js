@@ -9,9 +9,13 @@ function TheGame(params) {
     this._bf = [];
     this._positions = {};
     this.params = Object(params);
-    this.init(this.params.size);
     this._paused = true;
+    this.init();
 }
+
+TheGame.prototype.isPaused = function () {
+    return this._paused;
+};
 
 TheGame.prototype.fitPos = function (pos) {
     if (pos < 0) {
@@ -25,8 +29,9 @@ TheGame.prototype.fitPos = function (pos) {
     return pos;
 };
 
-TheGame.prototype.init = function (size) {
+TheGame.prototype.init = function () {
     var bf = this._bf;
+    var size = this.params.size;
 
     this.stop();
 
@@ -77,8 +82,8 @@ TheGame.prototype.eachUnit = function (fn, ctx) {
 };
 
 TheGame.prototype.stop = function () {
-    if (this._paused) {
-        return;
+    if (this.isPaused()) {
+        return false;
     }
 
     this.eachUnit(function (unit) {
@@ -86,13 +91,15 @@ TheGame.prototype.stop = function () {
     });
 
     this._paused = true;
+
+    return true;
 };
 
 TheGame.prototype.start = function () {
     var that = this;
 
-    if (!this._paused) {
-        return;
+    if (!this.isPaused()) {
+        return false;
     }
 
     this.eachUnit(function (unit) {
@@ -102,7 +109,7 @@ TheGame.prototype.start = function () {
     this._paused = false;
 
     (function continueGame() {
-        if (that._paused) {
+        if (that.isPaused()) {
             return;
         }
 
@@ -112,6 +119,8 @@ TheGame.prototype.start = function () {
 
         TheGame.pushFrame(continueGame);
     })();
+
+    return true;
 };
 
 TheGame.prototype.countUnits = function () {
@@ -128,9 +137,9 @@ TheGame.prototype.addRandomAntagonist = function () {
     var unit = this.createRandomAntagonist();
 
     this.takePos(pos, unit);
-    unit.setDirection(pos < this.getUnitPos(this.getHero()));
+    unit.setDirection(pos < this.getPos(this.getHero()));
 
-    if (!this._paused) {
+    if (!this.isPaused()) {
         unit.startMoving()
     }
 };
@@ -157,10 +166,15 @@ TheGame.prototype.addRandomAntagonist = function () {
 
 TheGame.prototype.delUnit = function (unit) {
     unit.stopMoving();
-    this._takePos(this.getUnitPos(unit), null);
+    this._takePos(this.getPos(unit), null);
 };
 
-TheGame.prototype.getUnitPos = function (unit) {
+TheGame.prototype.getPos = function (unit) {
+
+    if (!(unit instanceof Unit)) {
+        return -1;
+    }
+
     var id = unit.id;
     var pos = this._positions[id];
 
@@ -208,7 +222,7 @@ TheGame.prototype.takePos = function (existingPos, currentUnit) {
         }
     }
 
-    this._takePos(this.getUnitPos(currentUnit), null);
+    this._takePos(this.getPos(currentUnit), null);
 
     if (currentUnit.isAlive()) {
         this._takePos(existingPos, currentUnit);
@@ -272,7 +286,7 @@ Unit.prototype.takePos = function (pos) {
 };
 
 Unit.prototype.getCurrentPos = function () {
-    return this._game.getUnitPos(this);
+    return this._game.getPos(this);
 };
 
 Unit.prototype.getForwardPos = function (pos, offset) {
