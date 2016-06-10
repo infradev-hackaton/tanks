@@ -7,6 +7,7 @@
  * */
 function TheGame(params) {
     this._bf = [];
+    this._positions = {};
     this.params = Object(params);
     this.init(this.params.size);
     this._paused = true;
@@ -27,12 +28,16 @@ TheGame.prototype.fitPos = function (pos) {
 TheGame.prototype.init = function (size) {
     var bf = this._bf;
 
+    this.stop();
+
     bf.length = size;
 
     while (size) {
         size -= 1;
         bf[size] = null;
     }
+
+    this._positions = {};
 
     size = bf.length;
 
@@ -65,11 +70,10 @@ TheGame.prototype.each = function (fn, ctx) {
 };
 
 TheGame.prototype.eachUnit = function (fn, ctx) {
-    return this.each(function (unit) {
-        if (unit instanceof Unit) {
-            return fn.apply(this, arguments);
-        }
-    }, ctx);
+    Object.keys(this._positions).forEach(function (id) {
+        var pos = this._positions[id];
+        fn.call(ctx, this._bf[pos], pos, this._bf);
+    }, this);
 };
 
 TheGame.prototype.stop = function () {
@@ -111,11 +115,7 @@ TheGame.prototype.start = function () {
 };
 
 TheGame.prototype.countUnits = function () {
-    var unitsCount = 0;
-    this.eachUnit(function () {
-        unitsCount += 1;
-    });
-    return unitsCount;
+    return Object.keys(this._positions).length;
 };
 
 TheGame.prototype.createRandomAntagonist = function () {
@@ -161,14 +161,11 @@ TheGame.prototype.delUnit = function (unit) {
 };
 
 TheGame.prototype.getUnitPos = function (unit) {
-    var l = this._bf.length;
+    var id = unit.id;
+    var pos = this._positions[id];
 
-    while (l) {
-        l -= 1;
-
-        if (this._bf[l] === unit) {
-            return l;
-        }
+    if (typeof pos === 'number') {
+        return pos;
     }
 
     return -1;
@@ -176,7 +173,15 @@ TheGame.prototype.getUnitPos = function (unit) {
 
 TheGame.prototype._takePos = function (pos, obj) {
     if (pos > -1 && pos < this._bf.length) {
+        if (this._bf[pos] instanceof Unit) {
+            delete this._positions[this._bf[pos].id];
+        }
+
         this._bf[pos] = obj;
+
+        if (obj instanceof Unit) {
+            this._positions[obj.id] = pos;
+        }
     }
 };
 
@@ -214,6 +219,7 @@ TheGame.prototype.takePos = function (existingPos, currentUnit) {
  * @class Unit
  * */
 function Unit(game) {
+    this.id = String(Math.random() * Math.random());
     this._game = game;
     this._health = 0;
     this._damage = 0;
