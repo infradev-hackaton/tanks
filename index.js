@@ -6,22 +6,16 @@ var GAME = (function () {
     });
     var $view = $('.view');
 
-    var fpsAvg = 0;
+    var avgFps = 0;
     var framesCount = 0;
     var start = new Date();
 
     function renderGame(game) {
         var v = new Array(SIZE);
         var now = new Date();
-        var dur = now - start;
         framesCount += 1;
 
-        if (dur > 1000) {
-            fpsAvg += framesCount;
-            fpsAvg /= 2;
-            framesCount = 0;
-            start = now - (dur - 1000);
-        }
+        avgFps = framesCount / ((now - start) / 1000);
 
         game.each(function (unit, i) {
             if (unit instanceof Protagonist) {
@@ -51,7 +45,7 @@ var GAME = (function () {
             }
         });
 
-        var text = v.join('') + ' FPS: ' + fpsAvg.toFixed(2);
+        var text = v.join('') + ' FPS: ' + avgFps.toFixed(2);
 
         $view.html(text.replace(/\s/g, '&nbsp;'));
 
