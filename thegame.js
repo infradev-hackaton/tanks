@@ -248,6 +248,10 @@ Unit.prototype.startMoving = function () {
     var that = this;
     var start = new Date();
 
+    if (this._moving) {
+        return false;
+    }
+
     that._moving = true;
 
     (function moveFrame() {
@@ -272,7 +276,7 @@ Unit.prototype.startMoving = function () {
         }
     }());
 
-    return this;
+    return true;
 };
 
 Unit.prototype.stopMoving = function () {

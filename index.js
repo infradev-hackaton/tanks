@@ -61,14 +61,14 @@ var GAME = (function () {
     renderGame(game);
 
     function onArrowKd(e) {
-        if (e.key === 'ArrowRight') {
+        if (e.keyCode === 39) {
             $(window)
                 .off('keydown', onArrowKd)
                 .on('keyup', onArrowKu);
             game.getHero().
                 setDirection(true).
                 startMoving();
-        } else if (e.key === 'ArrowLeft') {
+        } else if (e.keyCode === 37) {
             $(window)
                 .off('keydown', onArrowKd)
                 .on('keyup', onArrowKu);
@@ -79,7 +79,7 @@ var GAME = (function () {
     }
 
     function onArrowKu(e) {
-        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        if (e.keyCode === 39 || e.keyCode === 37) {
             game.getHero().stopMoving();
             $(window)
                 .off('keyup', onArrowKu)
@@ -88,7 +88,7 @@ var GAME = (function () {
     }
 
     function onSpaceKd(e) {
-        if (e.key === ' ') {
+        if (e.keyCode === 32) {
             $(window)
                 .off('keydown', onSpaceKd)
                 .on('keyup', onSpaceKu);
@@ -97,7 +97,7 @@ var GAME = (function () {
     }
 
     function onSpaceKu(e) {
-        if (e.key === ' ') {
+        if (e.keyCode === 32) {
             $(window)
                 .on('keydown', onSpaceKd)
                 .off('keyup', onSpaceKu);
