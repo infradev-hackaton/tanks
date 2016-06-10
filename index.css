@@ -1,0 +1,9 @@
+.page_playing .button_action_start
+{
+    display: none;
+}
+
+.page_pause .button_action_pause
+{
+    display: none;
+}
