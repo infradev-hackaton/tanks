@@ -12,11 +12,6 @@ var GAME = (function () {
 
     function renderGame() {
         var v = new Array(SIZE);
-        var now = Date.now();
-        var time = now - start;
-
-        framesCount += 1;
-        avgFps = framesCount / time * 1000;
 
         game.each(function (unit, i) {
             if (unit instanceof Protagonist) {
@@ -46,12 +41,15 @@ var GAME = (function () {
 
         $view.html(text.replace(/\s/g, '&nbsp;'));
 
+        framesCount += 1;
+        avgFps = framesCount / (Date.now() - start) * 1000;
+
         return Boolean(game.getHero());
     }
 
     function initView() {
-        start = Date.now() - 1;
-        framesCount = -1;
+        start = Date.now();
+        framesCount = 0;
         avgFps = 0;
         renderGame();
     }
