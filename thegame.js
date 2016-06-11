@@ -146,37 +146,40 @@ TheGame.prototype.addRandomAntagonist = function () {
 };
 
 (function () {
-    var frames = [];
+    var stack = [];
 
     TheGame.pushFrame = function (func) {
-        if (!func.__id) {
-            func.__id = Math.random() * Math.random();
-        }
+        var frame = {
+            id: Math.random() * Math.random(),
+            fn: func
+        };
 
-        if (frames.push(func) === 1) {
+        if (stack.push(frame) === 1) {
             setTimeout(function () {
                 var i = 0;
-                var funcs = frames;
-                var l = funcs.length;
+                var frames = stack;
+                var l = frames.length;
+                var fn;
 
-                frames = [];
+                stack = [];
 
                 for (; i < l; i += 1) {
-                    funcs[i]();
+                    fn = frames[i].fn;
+                    fn();
                 }
             }, 0);
         }
 
-        return func.__id;
+        return frame.id;
 
     };
 
     TheGame.stopFrame = function (id) {
-        var l = frames.length;
+        var l = stack.length;
         while (l) {
             l -= 1;
-            if (frames[l].__id === id) {
-                frames.splice(l, 1);
+            if (stack[l].id === id) {
+                stack.splice(l, 1);
             }
         }
     };
@@ -266,7 +269,7 @@ Unit.prototype.getSpeed = function () {
 
 Unit.prototype.startMoving = function () {
     var that = this;
-    var start = new Date();
+    var start = Date.now();
 
     if (this._moving) {
         return false;
@@ -284,7 +287,7 @@ Unit.prototype.startMoving = function () {
             return;
         }
 
-        var now = new Date();
+        var now = Date.now();
         var time = now - start;
         var steps = that.getSpeed() / 1000 * time;
 
@@ -409,7 +412,7 @@ Protagonist.prototype.constructor = Protagonist;
 
 Protagonist.prototype.startFire = function () {
     var that = this;
-    var start = new Date();
+    var start = Date.now();
 
     if (this._fireing) {
         return false;
@@ -427,7 +430,7 @@ Protagonist.prototype.startFire = function () {
             return;
         }
 
-        var now = new Date();
+        var now = Date.now();
         var time = now - start;
         var shots = that._fireSpeed / 1000 * time;
 
