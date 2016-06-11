@@ -11,6 +11,7 @@ function TheGame(params) {
     this.params = Object(params);
     this._paused = true;
     this._heroId = null;
+    this._playFrameId = 0;
     this.init();
 }
 
@@ -90,6 +91,7 @@ TheGame.prototype.stop = function () {
     });
 
     this._paused = true;
+    TheGame.stopFrame(this._playFrameId);
 
     return true;
 };
@@ -116,7 +118,7 @@ TheGame.prototype.start = function () {
             that.addRandomAntagonist();
         }
 
-        TheGame.pushFrame(playFrame);
+        that._playFrameId = TheGame.pushFrame(playFrame);
     })();
 
     return true;
@@ -147,6 +149,10 @@ TheGame.prototype.addRandomAntagonist = function () {
     var frames = [];
 
     TheGame.pushFrame = function (func) {
+        if (!func.__id) {
+            func.__id = Math.random() * Math.random();
+        }
+
         if (frames.push(func) === 1) {
             setTimeout(function () {
                 var i = 0;
@@ -159,6 +165,19 @@ TheGame.prototype.addRandomAntagonist = function () {
                     funcs[i]();
                 }
             }, 0);
+        }
+
+        return func.__id;
+
+    };
+
+    TheGame.stopFrame = function (id) {
+        var l = frames.length;
+        while (l) {
+            l -= 1;
+            if (frames[l].__id === id) {
+                frames.splice(l, 1);
+            }
         }
     };
 }());
@@ -238,6 +257,7 @@ function Unit(game) {
     this._direction = true;
     this._speed = 0; // pos/sec
     this._moving = false;
+    this._moveFrameId = 0;
 }
 
 Unit.prototype.getSpeed = function () {
@@ -268,7 +288,7 @@ Unit.prototype.startMoving = function () {
         var time = now - start;
         var steps = that.getSpeed() / 1000 * time;
 
-        TheGame.pushFrame(moveFrame);
+        that._moveFrameId = TheGame.pushFrame(moveFrame);
 
         if (steps > 1) {
             start = now - (time % (1000 / that.getSpeed()));
@@ -281,6 +301,7 @@ Unit.prototype.startMoving = function () {
 
 Unit.prototype.stopMoving = function () {
     this._moving = false;
+    TheGame.stopFrame(this._moveFrameId);
 };
 
 Unit.prototype.takePos = function (pos) {
@@ -379,6 +400,7 @@ function Protagonist() {
     this._speed = 50;
     this._fireSpeed = 5;
     this._fireing = false;
+    this._fireFrameId = 0;
 }
 
 Protagonist.prototype = Object.create(Unit.prototype);
@@ -409,7 +431,7 @@ Protagonist.prototype.startFire = function () {
         var time = now - start;
         var shots = that._fireSpeed / 1000 * time;
 
-        TheGame.pushFrame(fireFrame);
+        that._fireFrameId = TheGame.pushFrame(fireFrame);
 
         if (shots > 1) {
             start = now - (time % (1000 / that._fireSpeed));
@@ -424,6 +446,7 @@ Protagonist.prototype.startFire = function () {
 
 Protagonist.prototype.stopFire = function () {
     this._fireing = false;
+    TheGame.stopFrame(this._fireFrameId);
 };
 
 Protagonist.prototype.fire = function () {
