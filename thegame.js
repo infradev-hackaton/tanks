@@ -224,7 +224,7 @@ TheGame.prototype.takePos = function (existingPos, currentUnit) {
 
     if (existingUnit instanceof Unit) {
         var units = [existingUnit, currentUnit];
-        var i = currentUnit.getSpeed() > existingUnit.getSpeed();
+        var i = currentUnit.getCurrentSpeed() > existingUnit.getCurrentSpeed();
 
         i = Number(i);
 
@@ -258,13 +258,17 @@ function Unit(game) {
     this._health = 0;
     this._damage = 0;
     this._direction = true;
-    this._speed = 0; // pos/sec
+    this._maxSpeed = 0; // pos/sec
     this._moving = false;
     this._moveFrameId = 0;
 }
 
-Unit.prototype.getSpeed = function () {
-    return this._speed;
+Unit.prototype.getMaxSpeed = function () {
+    return this._maxSpeed;
+};
+
+Unit.prototype.getCurrentSpeed = function () {
+    return this.getMaxSpeed() * this._moving;
 };
 
 Unit.prototype.startMoving = function () {
@@ -289,12 +293,13 @@ Unit.prototype.startMoving = function () {
 
         var now = Date.now();
         var time = now - start;
-        var steps = that.getSpeed() / 1000 * time;
+        var maxSpeed = that.getMaxSpeed();
+        var steps = maxSpeed / 1000 * time;
 
         that._moveFrameId = TheGame.pushFrame(moveFrame);
 
         if (steps > 1) {
-            start = now - (time % (1000 / that.getSpeed()));
+            start = now - (time % (1000 / maxSpeed));
             that.moveForward(Math.floor(steps));
         }
     }());
@@ -369,7 +374,7 @@ function Bullet() {
     Unit.apply(this, arguments);
     this._damage = 10;
     this._health = 1;
-    this._speed = 100;
+    this._maxSpeed = 100;
 
     this._range = 100;
     this._movedSteps = 0;
@@ -400,7 +405,8 @@ function Protagonist() {
     Unit.apply(this, arguments);
     this._health = 100;
     this._damage = 10;
-    this._speed = 50;
+    this._maxSpeed = 50;
+
     this._fireSpeed = 5;
     this._fireing = false;
     this._fireFrameId = 0;
@@ -460,7 +466,7 @@ Protagonist.prototype.fire = function () {
     bullet.setDirection(this.getDirection()); // same direction
     bullet.takePos(forwardPos); // position + 1
 
-    var bulletOffset = bullet.getForwardPos(forwardPos, Math.round(Math.sqrt(bullet.getSpeed()))) - forwardPos;
+    var bulletOffset = bullet.getForwardPos(forwardPos, Math.round(Math.sqrt(bullet.getMaxSpeed()))) - forwardPos;
 
     bullet.moveForward(Math.abs(bulletOffset));
 
@@ -471,7 +477,7 @@ function Antagonist1() {
     Unit.apply(this, arguments);
     this._health = 10;
     this._damage = 10;
-    this._speed = 20;
+    this._maxSpeed = 20;
 }
 
 Antagonist1.prototype = Object.create(Unit.prototype);
@@ -482,7 +488,7 @@ function Antagonist2() {
     Unit.apply(this, arguments);
     this._health = 20;
     this._damage = 15;
-    this._speed = 30;
+    this._maxSpeed = 30;
 }
 
 Antagonist2.prototype = Object.create(Unit.prototype);
@@ -493,7 +499,7 @@ function Antagonist3() {
     Unit.apply(this, arguments);
     this._health = 100;
     this._damage = 5;
-    this._speed = 10;
+    this._maxSpeed = 10;
 }
 
 Antagonist3.prototype = Object.create(Unit.prototype);
@@ -504,7 +510,7 @@ function Antagonist4() {
     Unit.apply(this, arguments);
     this._health = 20;
     this._damage = 50;
-    this._speed = 60;
+    this._maxSpeed = 60;
 }
 
 Antagonist4.prototype = Object.create(Unit.prototype);
@@ -515,7 +521,7 @@ function Antagonist5() {
     Unit.apply(this, arguments);
     this._health = 50;
     this._damage = 75;
-    this._speed = 40;
+    this._maxSpeed = 40;
 }
 
 Antagonist5.prototype = Object.create(Unit.prototype);
