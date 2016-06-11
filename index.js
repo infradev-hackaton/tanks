@@ -35,11 +35,7 @@ var GAME = (function () {
             } else if (unit instanceof Antagonist1) {
                 v[i] = '\ud83d\ude2c';
             } else if (unit instanceof Bullet) {
-                if (unit.getDirection()) {
-                    v[i] = '\u204d';
-                } else {
-                    v[i] = '\u204c';
-                }
+                v[i] = '-';
             } else {
                 v[i] = ' ';
             }
