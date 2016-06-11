@@ -7,15 +7,15 @@ var GAME = (function () {
     var $view = $('.view');
 
     var avgFps = 0;
-    var framesCount = -1;
-    var start = Date.now();
+    var framesCount = 0;
+    var start = 0;
 
-    function renderGame(game) {
+    function renderGame() {
         var v = new Array(SIZE);
         var now = Date.now();
         var time = now - start;
-        framesCount += 1;
 
+        framesCount += 1;
         avgFps = framesCount / time * 1000;
 
         game.each(function (unit, i) {
@@ -42,14 +42,21 @@ var GAME = (function () {
             }
         });
 
-        var text = v.join('') + ' F: ' + framesCount + ' T: ' + time + ' FPS: ' + avgFps.toFixed(2);
+        var text = v.join('') + ' FRAMES/TIME: ' + Math.round(avgFps);
 
         $view.html(text.replace(/\s/g, '&nbsp;'));
 
         return Boolean(game.getHero());
     }
 
-    renderGame(game);
+    function initView() {
+        start = Date.now() - 1;
+        framesCount = -1;
+        avgFps = 0;
+        renderGame();
+    }
+
+    initView();
 
     function onArrowKd(e) {
         if (e.keyCode === 39) {
@@ -107,10 +114,9 @@ var GAME = (function () {
             return;
         }
 
-        if (!renderGame(game)) {
+        if (!renderGame()) {
             game.stop();
-            $('.page')
-                .addClass('page_pause');
+            $('.page').addClass('page_pause');
         }
 
         TheGame.pushFrame(doLayout);
@@ -122,7 +128,7 @@ var GAME = (function () {
             .addClass('page_pause');
 
         game.init();
-        renderGame(game);
+        initView();
     });
 
     $('.button_action_start').click(function () {
@@ -131,7 +137,7 @@ var GAME = (function () {
                 .on('keydown', onArrowKd)
                 .on('keydown', onSpaceKd);
 
-            start = Date.now();
+            initView();
             doLayout();
         }
 
