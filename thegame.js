@@ -377,7 +377,7 @@ function Protagonist() {
     this._health = 100;
     this._damage = 10;
     this._speed = 50;
-    this._fireSpeed = 6;
+    this._fireSpeed = 5;
     this._fireing = false;
 }
 
