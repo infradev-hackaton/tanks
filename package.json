@@ -1,0 +1,27 @@
+{
+  "name": "tanks",
+  "version": "0.0.1",
+  "description": "Для запуска:",
+  "main": "index.js",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "webpack": "^1.13.1",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-core": "^6.9.1",
+    "babel-loader": "^6.2.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infradev-hackaton/tanks.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/infradev-hackaton/tanks/issues"
+  },
+  "homepage": "https://github.com/infradev-hackaton/tanks#readme"
+}
