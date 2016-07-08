@@ -6,10 +6,12 @@ class Unit {
         this._game = game;
         this._health = 0;
         this._damage = 0;
-        this._direction = true;
+        this._direction = ['t', 'r', 'b', 'l'];
         this._maxSpeed = 0; // pos/sec
         this._moving = false;
         this._moveFrameId = 0;
+        this._rotateFrameId = 0;
+        this._rotating = false;
     }
 
     getMaxSpeed() {
@@ -43,13 +45,13 @@ class Unit {
             let now = Date.now();
             let time = now - start;
             let maxSpeed = that.getMaxSpeed();
-            let steps = maxSpeed / 1000 * time;
+            let offset = maxSpeed / 1000 * time;
 
             that._moveFrameId = TheGame.pushFrame(moveFrame);
 
-            if (steps > 1) {
+            if (offset > 1) {
                 start = now - (time % (1000 / maxSpeed));
-                that.moveForward(Math.floor(steps));
+                that.moveForward(Math.floor(offset));
             }
         }());
 
@@ -61,46 +63,117 @@ class Unit {
         TheGame.stopFrame(this._moveFrameId);
     }
 
-    takePos(pos) {
-        this._game.takePos(pos, this);
+    takePos(x, y) {
+        this._game.takePos(x, y, this);
     }
 
     getCurrentPos() {
         return this._game.getPos(this);
     }
 
-    getForwardPos(pos, offset) {
-        if (this.getDirection()) {
-            return this._game.fitPos(pos + offset);
+    getForwardPos(x, y, offset) {
+        // TODO if
+        switch (this.getDirection()) {
+            case 'b':
+                return this._game.fitPos(x, y + offset);
+            case 't':
+                return this._game.fitPos(x, y - offset);
+            case 'r':
+                return this._game.fitPos(x + offset, y);
+            case 'l':
+                return this._game.fitPos(x - offset, y);
         }
-
-        return this._game.fitPos(pos - offset);
     }
 
-    moveForward(steps) {
-        while (steps) {
-            steps -= 1;
+    moveForward(offset) {
+        while (offset) {
+            offset -= 1;
+            let [curX, curY] = this.getCurrentPos();
 
-            let currentPos = this.getCurrentPos();
-            let forwardPos = this.getForwardPos(currentPos, 1);
+            if (curX === -1 || curY === -1) {
+                return false;
+            }
 
-            if (currentPos === forwardPos) {
+            let [fwdX, fwdY] = this.getForwardPos(curX, curY, 1);
+
+            if (curX === fwdX && curY === fwdY) {
                 // support ranges
                 return false;
             }
 
-            this.takePos(forwardPos);
+            this.takePos(fwdX, fwdY);
         }
 
         return true;
     }
 
     getDirection() {
-        return this._direction;
+        return this._direction[0];
+    }
+
+    rotateLeft() {
+        this._direction.unshift(this._direction.pop());
+    }
+
+    startRotation(toRight) {
+        let that = this;
+        let start = Date.now();
+
+        if (this._rotating) {
+            return false;
+        }
+
+        that._rotating = true;
+
+        (function rotateFrame() {
+            if (!that._rotating) {
+                return;
+            }
+
+            if (!that.isAlive()) {
+                that.stopRotation();
+                return;
+            }
+
+            let now = Date.now();
+            let time = now - start;
+            let speed = Math.sqrt(that.getMaxSpeed());
+            let offset = speed / 1000 * time;
+
+            that._rotateFrameId = TheGame.pushFrame(rotateFrame);
+
+            if (offset > 1) {
+                start = now - (time % (1000 / speed));
+                offset = Math.floor(offset);
+
+                while (offset) {
+                    offset -= 1;
+                    if (toRight) {
+                        that.rotateRight();
+                    } else {
+                        that.rotateLeft();
+                    }
+                }
+            }
+        })();
+
+        return true;
+    }
+
+    stopRotation() {
+        this._rotating = false;
+        TheGame.stopFrame(this._rotateFrameId);
+    }
+
+    rotateRight() {
+        this._direction.push(this._direction.shift());
     }
 
     setDirection(d) {
-        this._direction = d;
+        while (d !== this.getDirection()) {
+            this.rotateLeft();
+        }
+
         return this;
     }
 

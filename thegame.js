@@ -47,53 +47,76 @@ class TheGame {
         return this._paused;
     }
 
-    fitPos(pos) {
-        if (pos < 0) {
-            return 0;
+    fitPos(x, y) {
+
+        if (x < 0) {
+            x = 0;
+        } else {
+            let maxX = this.params.w - 1;
+
+            if (x > maxX) {
+                x = maxX;
+            }
         }
 
-        let lastPos = this._bf.length - 1;
+        if (y < 0) {
+            y = 0;
+        } else {
+            let maxY = this.params.h - 1;
 
-        if (pos > lastPos) {
-            return lastPos;
+            if (y > maxY) {
+                y = maxY;
+            }
         }
 
-        return pos;
+        return [x, y];
     }
 
     init() {
-        let bf = this._bf;
-        let size = this.params.size;
+        let sizeH = this.params.h;
         let hero = new Protagonist(this);
 
         this.stop();
 
-        bf.length = size;
+        this._bf.length = sizeH;
 
-        while (size) {
-            size -= 1;
-            bf[size] = null;
+        while (sizeH) {
+            sizeH -= 1;
+            this._bf[sizeH] = new Array(this.params.w);
+            let sizeW = this.params.w;
+
+            while (sizeW) {
+                sizeW -= 1;
+                this._bf[sizeH][sizeW] = null;
+            }
         }
 
         this._positions = {};
 
-        size = bf.length;
-
         this._heroId = hero.id;
 
-        this.takePos(Math.round(size / 2), hero);
+        this.takePos(Math.round(this.params.w / 2), Math.round(this.params.h / 2), hero);
     }
 
     getHero() {
-        return this._bf[this._positions[this._heroId]];
+        let xy = this._positions[this._heroId];
+
+        if (Array.isArray(xy)) {
+            let [x, y] = xy;
+            return this._bf[y][x];
+        }
+
+        return null;
     }
 
     each(fn, ctx) {
         let bf = this._bf;
 
-        for (let i = 0, l = bf.length; i < l; i += 1) {
-            if (fn.call(ctx, bf[i], i, bf) === false) {
-                return false;
+        for (let y = 0, h = bf.length; y < h; y += 1) {
+            for (let x = 0, w = bf[y].length; x < w; x += 1) {
+                if (fn.call(ctx, bf[y][x], x, y, bf) === false) {
+                    return false;
+                }
             }
         }
 
@@ -102,8 +125,8 @@ class TheGame {
 
     eachUnit(fn, ctx) {
         Object.keys(this._positions).forEach((id) => {
-            let pos = this._positions[id];
-            fn.call(ctx, this._bf[pos], pos, this._bf);
+            let [x, y] = this._positions[id];
+            fn.call(ctx, this._bf[y][x], x, y, this._bf);
         });
     }
 
@@ -129,9 +152,9 @@ class TheGame {
             return false;
         }
 
-        this.eachUnit((unit) => {
-            unit.startMoving();
-        });
+        // this.eachUnit((unit) => {
+        //     unit.startMoving();
+        // });
 
         this._paused = false;
 
@@ -141,7 +164,7 @@ class TheGame {
             }
 
             if (that.countUnits() < that.params.unitsCount) {
-                that.addRandomAntagonist();
+                // that.addRandomAntagonist();
             }
 
             that._playFrameId = TheGame.pushFrame(playFrame);
@@ -160,38 +183,46 @@ class TheGame {
     }
 
     addRandomAntagonist() {
-        let pos = Math.round(Math.random()) * this._bf.length - 1;
+        let randY = Math.round(Math.random()) * this.params.h - 1;
+        let randX = Math.round(Math.random()) * this.params.w - 1;
+
         let unit = this.createRandomAntagonist();
 
-        this.takePos(pos, unit);
-        unit.setDirection(pos < this.getPos(this.getHero()));
+        this.takePos(randX, randY, unit);
+
+        // unit.setDirection(randY < this.getPos(this.getHero()));
 
         if (!this.isPaused()) {
-            unit.startMoving()
+            unit.startMoving();
         }
     }
 
     delUnit(unit) {
         unit.stopMoving();
-        this._takePos(this.getPos(unit), null);
+        let [x, y] = this.getPos(unit);
+        this._takePos(x, y, null);
     }
 
     getPos(unit) {
         if (!(unit instanceof Unit)) {
-            return -1;
+            return [-1, -1];
         }
 
-        let pos = this._positions[unit.id];
+        let xy = this._positions[unit.id];
 
-        if (typeof pos === 'number') {
-            return pos;
+        if (Array.isArray(xy)) {
+            return xy;
         }
 
-        return -1;
+        return [-1, -1];
     }
 
-    takePos(existingPos, currentUnit) {
-        let existingUnit = this._bf[existingPos];
+    takePos(existingX, existingY, currentUnit) {
+        let existingUnit = null;
+
+        if (Array.isArray(this._bf[existingY])) {
+            existingUnit = this._bf[existingY][existingX];
+        }
 
         if (existingUnit instanceof Unit) {
             let units = [existingUnit, currentUnit];
@@ -213,23 +244,25 @@ class TheGame {
             }
         }
 
-        this._takePos(this.getPos(currentUnit), null);
+        let [x, y] = this.getPos(currentUnit);
+
+        this._takePos(x, y, null);
 
         if (currentUnit.isAlive()) {
-            this._takePos(existingPos, currentUnit);
+            this._takePos(existingX, existingY, currentUnit);
         }
     }
 
-    _takePos(pos, obj) {
-        if (pos > -1 && pos < this._bf.length) {
-            if (this._bf[pos] instanceof Unit) {
-                delete this._positions[this._bf[pos].id];
+    _takePos(x, y, obj) {
+        if (x > -1 && x < this.params.w && y > -1 && y < this.params.h) {
+            if (this._bf[y][x] instanceof Unit) {
+                delete this._positions[this._bf[y][x].id];
             }
 
-            this._bf[pos] = obj;
+            this._bf[y][x] = obj;
 
             if (obj instanceof Unit) {
-                this._positions[obj.id] = pos;
+                this._positions[obj.id] = [x, y];
             }
         }
     }

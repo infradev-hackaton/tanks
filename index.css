@@ -1,7 +1,15 @@
 .view
 {
     font-family: monospace;
+    letter-spacing: 0.8em;
+    border: 1px solid grey;
+    display: inline-block;
 }
+
+.view, .fps {
+    margin-left: 50px;
+}
+
 .page_playing .button_action_start
 {
     display: none;

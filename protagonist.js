@@ -8,7 +8,7 @@ class Protagonist extends Unit {
 
         this._health = 100;
         this._damage = 10;
-        this._maxSpeed = 50;
+        this._maxSpeed = 25;
 
         this._fireSpeed = 5;
         this._fireing = false;
@@ -59,15 +59,13 @@ class Protagonist extends Unit {
 
     fire() {
         let bullet = new Bullet(this._game);
-        let currentPos = this.getCurrentPos();
-        let forwardPos = this.getForwardPos(currentPos, 1);
+        let [curX, curY] = this.getCurrentPos();
+        let [fwdX, fwdY] = this.getForwardPos(curX, curY, 1);
 
         bullet.setDirection(this.getDirection()); // same direction
-        bullet.takePos(forwardPos); // position + 1
+        bullet.takePos(fwdX, fwdY); // position + 1
 
-        let bulletOffset = bullet.getForwardPos(forwardPos, Math.round(Math.sqrt(bullet.getMaxSpeed()))) - forwardPos;
-
-        bullet.moveForward(Math.abs(bulletOffset));
+        bullet.moveForward(Math.round(Math.sqrt(bullet.getMaxSpeed())));
 
         bullet.startMoving();
     }
