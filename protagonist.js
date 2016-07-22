@@ -13,6 +13,9 @@ class Protagonist extends Unit {
         this._fireSpeed = 5;
         this._fireing = false;
         this._fireFrameId = 0;
+
+        this._rotateFrameId = 0;
+        this._rotating = false;
     }
 
     startFire() {
@@ -69,6 +72,57 @@ class Protagonist extends Unit {
 
         bullet.startMoving();
     }
+
+    startRotation(toRight) {
+        let that = this;
+        let start = Date.now();
+
+        if (this._rotating) {
+            return false;
+        }
+
+        that._rotating = true;
+
+        (function rotateFrame() {
+            if (!that._rotating) {
+                return;
+            }
+
+            if (!that.isAlive()) {
+                that.stopRotation();
+                return;
+            }
+
+            let now = Date.now();
+            let time = now - start;
+            let speed = Math.sqrt(that.getMaxSpeed());
+            let offset = speed / 1000 * time;
+
+            that._rotateFrameId = TheGame.pushFrame(rotateFrame);
+
+            if (offset > 1) {
+                start = now - (time % (1000 / speed));
+                offset = Math.floor(offset);
+
+                while (offset) {
+                    offset -= 1;
+                    if (toRight) {
+                        that.rotateRight();
+                    } else {
+                        that.rotateLeft();
+                    }
+                }
+            }
+        })();
+
+        return true;
+    }
+
+    stopRotation() {
+        this._rotating = false;
+        TheGame.stopFrame(this._rotateFrameId);
+    }
+
 }
 
 export default Protagonist;
