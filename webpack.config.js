@@ -3,9 +3,9 @@
 const ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
-    entry: './index',
+    entry: './src/index.js',
     output: {
-        filename: 'bundle.js'
+        filename: 'assets/build/index.js'
     },
     watch: ENV === 'development',
     watchOptions: {
