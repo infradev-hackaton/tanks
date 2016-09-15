@@ -1,0 +1,39 @@
+html,
+body
+{
+    margin: 0;
+    padding: 0
+}
+
+.page
+{
+    padding: 2em;
+}
+
+.canvas-view
+{
+    display: block;
+    width: 800px;
+    height: 600px;
+    border: 1px solid grey;
+}
+
+.canvas-view .tank
+{
+    color: #000;
+    background-color: brown;
+}
+
+.canvas-view .tank .wheels
+{
+    background-color: #000;
+}
+
+.canvas-view .bullet
+{
+    background-color: red;
+}
+
+#log {
+    font-family: monospace;
+}

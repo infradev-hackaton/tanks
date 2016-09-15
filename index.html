@@ -1,17 +1,18 @@
 <html>
-<head>
-    <title>The game</title>
-    <meta charset="utf-8"/>
-    <link rel="stylesheet" href="index.css">
-</head>
-<body class="page page_pause">
-<pre class="view"></pre>
-<div class="fps"></div>
-<button class="button_action_reset">Reset</button>
-<button class="button_action_start">Start</button>
-<button class="button_action_pause">Pause</button>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<script type="application/javascript" src="bundle.js"></script>
-</body>
+    <head>
+        <title>The game</title>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" href="assets/index.css">
+    </head>
+    <body class="page">
+        <canvas class="canvas-view" width="10" height="10">
+            <div class="tank">
+                <div class="wheels"></div>
+            </div>
+            <div class="bullet"></div>
+        </canvas>
+        <script type="application/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script type="application/javascript" src="assets/build/index.js"></script>
+        <div id="log"></div>
+    </body>
 </html>
