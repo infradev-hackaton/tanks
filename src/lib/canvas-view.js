@@ -103,16 +103,13 @@ class CanvasView extends Events {
         const pxY = this._cPx(y);
         const pxW = this._cPx(1);
         const pxH = this._cPx(1);
-
-        this._strokeWheelsPx(pxX, pxY, pxW, pxH, d);
-        this._strokeBodyPx(pxX, pxY, pxW, pxH, d);
-        this._strokeTowerPx(pxX, pxY, pxW, pxH, d);
-        this._strokeGunPx(pxX, pxY, pxW, pxH, d);
-    }
-
-    _strokeWheelsPx(pxX, pxY, pxW, pxH, d) {
         const ctx = this._ctx;
+        const GUN_W = 0.1;
+        const BODY_W = 0.8;
+        const BODY_H = 0.7;
         const WHEEL_W = 0.2;
+
+        // wheels
 
         ctx.save();
 
@@ -133,20 +130,9 @@ class CanvasView extends Events {
             pxW * WHEEL_W,
             pxH);
 
-        ctx.restore();
-    }
-
-    _strokeBodyPx(pxX, pxY, pxW, pxH, d) {
-        const ctx = this._ctx;
-        const BODY_W = 0.8;
-        const BODY_H = 0.7;
-
-        ctx.save();
+        // body
 
         ctx.fillStyle = this._getStyle('.tank', 'background-color');
-
-        ctx.translate(pxX + pxW / 2, pxY + pxH / 2);
-        ctx.rotate(rad(d));
 
         ctx.fillRect(
             -pxW / 2 + (pxW - pxW * BODY_W) / 2,
@@ -154,33 +140,20 @@ class CanvasView extends Events {
             pxW * BODY_W,
             pxH * BODY_H);
 
-        ctx.restore();
-    }
+        // tower
 
-    _strokeTowerPx(pxX, pxY, pxW, pxH, d) {
-        const ctx = this._ctx;
-
-        ctx.save();
         ctx.beginPath();
 
         ctx.lineWidth = this._cPx(1) / 20;
         ctx.strokeStyle = this._getStyle('.tank', 'color');
-        ctx.arc(pxX + pxW / 2, pxY + pxH / 2, pxW / 4, 0, 2 * Math.PI, false);
+        ctx.arc(0, 0, pxW / 4, 0, 2 * Math.PI, false);
         ctx.stroke();
 
         ctx.closePath();
-        ctx.restore();
-    }
 
-    _strokeGunPx(pxX, pxY, pxW, pxH, d) {
-        const ctx = this._ctx;
-        const GUN_W = 0.1;
+        // gun
 
-        ctx.save();
         ctx.fillStyle = this._getStyle('.tank', 'color');
-
-        ctx.translate(pxX + pxW / 2, pxY + pxH / 2);
-        ctx.rotate(rad(d));
 
         ctx.fillRect(
             -pxW / 2 + (pxW - pxW * GUN_W) / 2,
